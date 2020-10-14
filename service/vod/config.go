@@ -150,12 +150,12 @@ var (
 				"Version": []string{"2018-01-01"},
 			},
 		},
-		"SetVideoPublishStatus": {
+		"UpdateVideoPublishStatus": {
 			Method: http.MethodGet,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"SetVideoPublishStatus"},
-				"Version": []string{"2018-01-01"},
+				"Action":  []string{"UpdateVideoPublishStatus"},
+				"Version": []string{"2020-08-01"},
 			},
 		},
 		"GetCdnDomainWeights": {
@@ -166,12 +166,28 @@ var (
 				"Version": []string{"2019-07-01"},
 			},
 		},
-		"ModifyVideoInfo": {
-			Method: http.MethodPost,
+		"UpdateVideoInfo": {
+			Method: http.MethodGet,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"ModifyVideoInfo"},
-				"Version": []string{"2018-01-01"},
+				"Action":  []string{"UpdateVideoInfo"},
+				"Version": []string{"2020-08-01"},
+			},
+		},
+		"GetVideoInfos": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetVideoInfos"},
+				"Version": []string{"2020-08-01"},
+			},
+		},
+		"GetRecommendedPosters": {
+			Method: http.MethodGet,
+			Path:   "/",
+			Query: url.Values{
+				"Action":  []string{"GetRecommendedPosters"},
+				"Version": []string{"2020-08-01"},
 			},
 		},
 	}

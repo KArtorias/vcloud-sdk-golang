@@ -196,28 +196,35 @@ func (p *Vod) CommitUpload(params CommitUploadParam) (*CommitUploadResp, error) 
 	}
 }
 
-func (p *Vod) ModifyVideoInfo(body ModifyVideoInfoBody) (*ModifyVideoInfoResp, error) {
+func (p *Vod) UpdateVideoInfo(req *UpdateVideoInfoRequest) (*UpdateVideoInfoResponse, error) {
 	query := url.Values{}
-
-	bts, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
+	query.Add("Vid", req.GetVid())
+	if req.IsSetPosterUri() {
+		query.Add("PosterUri", req.GetPosterUri())
+	}
+	if req.IsSetTitle() {
+		query.Add("Title", req.GetTitle())
+	}
+	if req.IsSetDescription() {
+		query.Add("Description", req.GetDescription())
+	}
+	if req.IsSetTags() {
+		query.Add("Tags", req.GetTags())
 	}
 
-	respBody, status, err := p.Json("ModifyVideoInfo", query, string(bts))
+	respBody, status, err := p.Query("UpdateVideoInfo", query)
 	if err != nil {
 		return nil, err
 	}
 	if status != http.StatusOK {
 		return nil, errors.Wrap(fmt.Errorf("http error"), string(status))
 	}
-	resp := &ModifyVideoInfoResp{}
+	resp := &UpdateVideoInfoResponse{}
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, err
-	} else {
-		resp.ResponseMetadata.Service = "vod"
-		return resp, nil
 	}
+	resp.ResponseMetadata.Service = "vod"
+	return resp, nil
 }
 
 func (p *Vod) Upload(fileBytes []byte, spaceName string, fileType FileType) (string, string, error) {
@@ -292,14 +299,11 @@ func (p *Vod) UploadPoster(vid string, fileBytes []byte, spaceName string, fileT
 		return "", err
 	}
 
-	body := ModifyVideoInfoBody{
-		SpaceName: spaceName,
-		Vid:       vid,
-		Info: UserMetaInfo{
-			PosterUri: oid,
-		},
-	}
-	_, err = p.ModifyVideoInfo(body)
+	req := NewUpdateVideoInfoRequest()
+	req.SetVid(vid)
+	req.SetPosterUri(oid)
+
+	_, err = p.UpdateVideoInfo(req)
 	if err != nil {
 		return "", err
 	}
@@ -335,21 +339,54 @@ func (p *Vod) UploadVideoInner(fileBytes []byte, spaceName string, fileType File
 	return commitResp, nil
 }
 
-// SetVideoPublishStatus 媒资相关
-func (p *Vod) SetVideoPublishStatus(SpaceName, Vid, Status string) (*SetVideoPublishStatusResp, int, error) {
-	jsonTemp := `{
-		"SpaceName" : "%v",
-		"Vid" : "%v",
-		"Status" : "%v"
-	}`
+// UpdateVideoPublishStatus 媒资相关
+func (p *Vod) UpdateVideoPublishStatus(req *UpdateVideoPublishStatusRequest) (*UpdateVideoPublishStatusResponse, int, error) {
+	query := url.Values{}
+	query.Add("Vid", req.GetVid())
+	query.Add("Status", req.GetStatus())
 
-	body := fmt.Sprintf(jsonTemp, SpaceName, Vid, Status)
-	respBody, status, err := p.Json("SetVideoPublishStatus", nil, body)
+	respBody, respStatus, err := p.Query("UpdateVideoPublishStatus", query)
+	if err != nil {
+		return nil, respStatus, err
+	}
+
+	output := new(UpdateVideoPublishStatusResponse)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, respStatus, err
+	}
+	output.ResponseMetadata.Service = "vod"
+	return output, respStatus, nil
+}
+
+//获取视频信息
+func (p *Vod) GetVideoInfos(req *GetVideoInfosRequest) (*GetVideoInfosResponse, int, error) {
+	query := url.Values{}
+	query.Add("Vids", strings.Join(req.GetVids(), ","))
+
+	respBody, status, err := p.Query("GetVideoInfos", query)
 	if err != nil {
 		return nil, status, err
 	}
 
-	output := new(SetVideoPublishStatusResp)
+	output := new(GetVideoInfosResponse)
+	if err := json.Unmarshal(respBody, output); err != nil {
+		return nil, status, err
+	}
+	output.ResponseMetadata.Service = "vod"
+	return output, status, nil
+}
+
+//获取视频候选封面
+func (p *Vod) GetRecommendedPosters(req *GetRecommendedPostersRequest) (*GetRecommendedPostersResponse, int, error) {
+	query := url.Values{}
+	query.Add("Vids", strings.Join(req.GetVids(), ","))
+
+	respBody, status, err := p.Query("GetRecommendedPosters", query)
+	if err != nil {
+		return nil, status, err
+	}
+
+	output := new(GetRecommendedPostersResponse)
 	if err := json.Unmarshal(respBody, output); err != nil {
 		return nil, status, err
 	}
