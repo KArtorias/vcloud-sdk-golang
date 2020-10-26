@@ -5,12 +5,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/TTvcloud/vcloud-sdk-golang/models"
+	"github.com/golang/protobuf/jsonpb"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
-	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -18,51 +19,44 @@ import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
 	"github.com/pkg/errors"
-
-	jsoniter "github.com/json-iterator/go"
 )
 
 //GetPlayInfo 获取播放信息
-func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
-	vid := video.Vid
+func (p *Vod) GetPlayInfo(video *models.VodGetPlayInfoRequest) (*models.VodGetPlayInfoResponse, int, error) {
+	vid := video.GetVid()
 	if len(vid) == 0 {
-		return nil, http.StatusBadRequest, errors.New("Empty Vid")
+		return nil, http.StatusBadRequest, errors.New(string(invalidParameter))
 	}
 	query := url.Values{}
-	query.Set("Vid", video.Vid)
-	query.Set("Base64", strconv.FormatInt(video.Base64, 10))
-	query.Set("Ssl", strconv.FormatInt(video.Ssl, 10))
+	query.Set("Vid", vid)
+	query.Set("Base64", video.GetBase64())
+	query.Set("Ssl", video.GetSsl())
 
-	if len(video.FormatType) > 0 {
-		query.Set("Format", video.FormatType)
+	if len(video.GetFormat()) > 0 {
+		query.Set("Format", video.GetFormat())
 	}
-	if len(video.CodecType) > 0 {
-		query.Set("Codec", video.CodecType)
+	if len(video.GetCodec()) > 0 {
+		query.Set("Codec", video.GetCodec())
 	}
-	if len(video.Definition) > 0 {
-		query.Set("Definition", video.Definition)
+	if len(video.GetDefinition()) > 0 {
+		query.Set("Definition", video.GetDefinition())
 	}
-	if len(video.Watermark) > 0 {
-		query.Set("Watermark", video.Watermark)
+	if len(video.GetLogoType()) > 0 {
+		query.Set("LogoType", video.GetLogoType())
 	}
-	if len(video.StreamType) > 0 {
-		query.Set("StreamType", video.StreamType)
+	if len(video.GetFileType()) > 0 {
+		query.Set("FileType", video.GetFileType())
 	}
 
 	respBody, status, err := p.Query("GetPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
-
-	output := new(GetPlayInfoResp)
-	jsonTag := os.Getenv("JSON_FORMATTER")
-	switch jsonTag {
-	case base.JSON_FORMATTER_JSONITER:
-		jsonFormatter := jsoniter.ConfigCompatibleWithStandardLibrary
-		err = jsonFormatter.Unmarshal(respBody, output)
-	default:
-		err = json.Unmarshal(respBody, output)
+	output := &models.VodGetPlayInfoResponse{}
+	unmarshaler := jsonpb.Unmarshaler{
+		AllowUnknownFields: true,
 	}
+	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
 	if err != nil {
 		return nil, status, err
 	} else {
@@ -71,46 +65,50 @@ func (p *Vod) GetPlayInfo(video GetPlayInfoReq) (*GetPlayInfoResp, int, error) {
 }
 
 //GetOriginVideoPlayInfo 获取原片播放信息
-func (p *Vod) GetOriginVideoPlayInfo(query url.Values) (*GetOriginVideoPlayInfoResp, int, error) {
+func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) (*models.VodGetOriginalPlayInfoResponse, int, error) {
+	vid := req.GetVid()
+	if len(vid) == 0 {
+		return nil, http.StatusBadRequest, errors.New(string(invalidParameter))
+	}
+	query := url.Values{}
+	query.Set("Vid", vid)
+	query.Set("Base64", req.GetBase64())
+	query.Set("Ssl", req.GetSsl())
 	respBody, status, err := p.Query("GetOriginVideoPlayInfo", query)
 	if err != nil {
 		return nil, status, err
 	}
-
-	output := new(GetOriginVideoPlayInfoResp)
-	if err := json.Unmarshal(respBody, output); err != nil {
+	output := &models.VodGetOriginalPlayInfoResponse{}
+	unmarshaler := jsonpb.Unmarshaler{
+		AllowUnknownFields: true,
+	}
+	err = unmarshaler.Unmarshal(bytes.NewReader(respBody), output)
+	if err != nil {
 		return nil, status, err
 	} else {
-		output.ResponseMetadata.Service = "vod"
 		return output, status, nil
 	}
 }
 
-func (p *Vod) StartTranscode(req *StartTranscodeRequest) (*StartTranscodeResp, error) {
-	query := url.Values{
-		"TemplateId": []string{req.TemplateId},
-	}
 
-	reqBody := struct {
-		Vid      string
-		Input    map[string]interface{}
-		Priority int
-	}{
-		Vid:      req.Vid,
-		Input:    req.Input,
-		Priority: req.Priority,
+func (p *Vod) StartWorkflow(req *StartWorkflowRequest) (*StartWorkflowResp, error) {
+	form := url.Values{
+		"TemplateId":   []string{req.TemplateId},
+		"Vid":          []string{req.Vid},
+		"Priority":     []string{strconv.Itoa(req.Priority)},
+		"CallbackArgs": []string{req.CallbackArgs},
 	}
-	body, err := json.Marshal(reqBody)
+	inputStr, err := json.Marshal(req.Input)
 	if err != nil {
-		return nil, errors.Wrap(err, "marshal body failed")
+		return nil, errors.Wrap(err, "marshal input params failed")
 	}
-
-	respBody, status, err := p.Json("StartTranscode", query, string(body))
+	form.Add("Input", string(inputStr))
+	respBody, status, err := p.Post("StartWorkflow", url.Values{}, form)
 	if err != nil || status != http.StatusOK {
 		return nil, errors.Wrap(err, "query error")
 	}
 
-	resp := new(StartTranscodeResp)
+	resp := new(StartWorkflowResp)
 	if err := json.Unmarshal(respBody, resp); err != nil {
 		return nil, errors.Wrap(err, "unmarshal body failed")
 	}
@@ -406,33 +404,6 @@ func (p *Vod) GetPlayAuthToken(query url.Values) (string, error) {
 
 	b, _ := json.Marshal(ret)
 	return base64.StdEncoding.EncodeToString(b), nil
-}
-
-//GetRedirectPlayUrl get redirected playback addres
-func (p *Vod) GetRedirectPlayUrl(params RedirectPlayParam) (string, error) {
-	query := url.Values{}
-	if params.Vid == "" {
-		return "", errors.New("Vid not set")
-	}
-	query.Add("Vid", params.Vid)
-	if params.Definition != "" {
-		query.Add("Definition", string(params.Definition))
-	}
-	if params.Watermark != "" {
-		query.Add("Watermark", params.Watermark)
-	}
-	if params.Expires != "" {
-		query.Add("X-Amz-Expires", params.Expires)
-	}
-
-	token, err := p.GetSignUrl("RedirectPlay", query)
-	if err != nil {
-		return "", err
-	}
-
-	apiInfo := p.ApiInfoList["RedirectPlay"]
-	url := fmt.Sprintf("http://%s%s?%s", p.ServiceInfo.Host, apiInfo.Path, token)
-	return url, nil
 }
 
 func (p *Vod) GetUploadAuthToken(query url.Values) (string, error) {
