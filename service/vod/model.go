@@ -2,6 +2,8 @@ package vod
 
 import (
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
+	"github.com/TTvcloud/vcloud-sdk-golang/models"
+	"github.com/golang/protobuf/ptypes/wrappers"
 )
 
 type GetPlayInfoReq struct {
@@ -191,78 +193,6 @@ type AdvanceOption struct {
 	SliceSize int
 }
 
-type UpdateVideoInfoRequest struct {
-	Vid         string  `json:"Vid"`
-	PosterUri   *string `json:"PosterUri"`
-	Title       *string `json:"Title"`
-	Description *string `json:"Description"`
-	Tags        *string `json:"Tags"`
-}
-
-func NewUpdateVideoInfoRequest() *UpdateVideoInfoRequest {
-	return &UpdateVideoInfoRequest{}
-}
-
-func (r *UpdateVideoInfoRequest) IsSetPosterUri() bool {
-	return r.PosterUri != nil
-}
-
-func (r *UpdateVideoInfoRequest) IsSetTitle() bool {
-	return r.Title != nil
-}
-
-func (r *UpdateVideoInfoRequest) IsSetDescription() bool {
-	return r.Description != nil
-}
-
-func (r *UpdateVideoInfoRequest) IsSetTags() bool {
-	return r.Tags != nil
-}
-
-func (r *UpdateVideoInfoRequest) SetVid(vid string) {
-	r.Vid = vid
-}
-
-func (r *UpdateVideoInfoRequest) SetPosterUri(posterUri string) {
-	r.PosterUri = &posterUri
-}
-
-func (r *UpdateVideoInfoRequest) SetTitle(title string) {
-	r.Title = &title
-}
-
-func (r *UpdateVideoInfoRequest) SetDescription(desc string) {
-	r.Description = &desc
-}
-
-func (r *UpdateVideoInfoRequest) SetTags(tags string) {
-	r.Tags = &tags
-}
-
-func (r *UpdateVideoInfoRequest) GetVid() string {
-	return r.Vid
-}
-
-func (r *UpdateVideoInfoRequest) GetPosterUri() string {
-	return *r.PosterUri
-}
-
-func (r *UpdateVideoInfoRequest) GetTitle() string {
-	return *r.Title
-}
-
-func (r *UpdateVideoInfoRequest) GetDescription() string {
-	return *r.Description
-}
-
-func (r *UpdateVideoInfoRequest) GetTags() string {
-	return *r.Tags
-}
-
-type UpdateVideoInfoResponse struct {
-	ResponseMetadata *base.ResponseMetadata
-}
-
 type BaseResp struct {
 	StatusMessage string
 	StatusCode    int
@@ -355,14 +285,97 @@ type Encryption struct {
 	Extra     map[string]string
 }
 
-// UpdateVideoPublishStatus
-type UpdateVideoPublishStatusRequest struct {
-	Vid    string
-	Status string
+type GetWeightsResp struct {
+	ResponseMetadata *base.ResponseMetadata
+	Result           map[string]map[string]int `json:",omitempty"`
 }
 
+type DomainInfo struct {
+	MainDomain   string
+	BackupDomain string
+}
+
+type ImgUrl struct {
+	MainUrl   string
+	BackupUrl string
+}
+
+//UpdateVideoInfo
+type UpdateVideoInfoRequest struct {
+	models.UpdateVideoInfoRequest
+}
+
+func NewUpdateVideoInfoRequest() *UpdateVideoInfoRequest {
+	return &UpdateVideoInfoRequest{}
+}
+
+func (r *UpdateVideoInfoRequest) IsSetPosterUri() bool {
+	return r.PosterUri != nil
+}
+
+func (r *UpdateVideoInfoRequest) IsSetTitle() bool {
+	return r.Title != nil
+}
+
+func (r *UpdateVideoInfoRequest) IsSetDescription() bool {
+	return r.Description != nil
+}
+
+func (r *UpdateVideoInfoRequest) IsSetTags() bool {
+	return r.Tags != nil
+}
+
+func (r *UpdateVideoInfoRequest) SetVid(vid string) {
+	r.Vid = vid
+}
+
+func (r *UpdateVideoInfoRequest) SetPosterUri(posterUri string) {
+	r.PosterUri = &wrappers.StringValue{Value: posterUri}
+}
+
+func (r *UpdateVideoInfoRequest) SetTitle(title string) {
+	r.Title = &wrappers.StringValue{Value: title}
+}
+
+func (r *UpdateVideoInfoRequest) SetDescription(desc string) {
+	r.Description = &wrappers.StringValue{Value: desc}
+}
+
+func (r *UpdateVideoInfoRequest) SetTags(tags string) {
+	r.Tags = &wrappers.StringValue{Value: tags}
+}
+
+func (r *UpdateVideoInfoRequest) GetVid() string {
+	return r.Vid
+}
+
+func (r *UpdateVideoInfoRequest) GetPosterUri() string {
+	return r.PosterUri.GetValue()
+}
+
+func (r *UpdateVideoInfoRequest) GetTitle() string {
+	return r.Title.GetValue()
+}
+
+func (r *UpdateVideoInfoRequest) GetDescription() string {
+	return r.Description.GetValue()
+}
+
+func (r *UpdateVideoInfoRequest) GetTags() string {
+	return r.Tags.GetValue()
+}
+
+type UpdateVideoInfoResponse struct {
+	ResponseMetadata *base.ResponseMetadata
+}
+
+// UpdateVideoPublishStatus
 func NewUpdateVideoPublishStatusRequest() *UpdateVideoPublishStatusRequest {
 	return &UpdateVideoPublishStatusRequest{}
+}
+
+type UpdateVideoPublishStatusRequest struct {
+	models.UpdateVideoPublishStatusRequest
 }
 
 func (r *UpdateVideoPublishStatusRequest) SetVid(vid string) {
@@ -385,24 +398,9 @@ type UpdateVideoPublishStatusResponse struct {
 	ResponseMetadata *base.ResponseMetadata
 }
 
-type GetWeightsResp struct {
-	ResponseMetadata *base.ResponseMetadata
-	Result           map[string]map[string]int `json:",omitempty"`
-}
-
-type DomainInfo struct {
-	MainDomain   string
-	BackupDomain string
-}
-
-type ImgUrl struct {
-	MainUrl   string
-	BackupUrl string
-}
-
 //视频详情
 type GetVideoInfosRequest struct {
-	Vids []string
+	models.GetVideoInfosRequest
 }
 
 func NewGetVideoInfosRequest() *GetVideoInfosRequest {
@@ -417,86 +415,13 @@ func (r *GetVideoInfosRequest) GetVids() []string {
 	return r.Vids
 }
 
-type AudioStreamMeta struct {
-	Codec      string  `json:"Codec"`
-	Duration   float64 `json:"Duration"`
-	SampleRate int64   `json:"SampleRate"`
-	Bitrate    int64   `json:"Bitrate"`
-}
-
-type VideoStreamMeta struct {
-	Codec      string  `json:"Codec"`
-	Height     int64   `json:"Height"`
-	Width      int64   `json:"Width"`
-	Duration   float64 `json:"Duration"`
-	Definition string  `json:"Definition"`
-	Bitrate    int64   `json:"Bitrate"`
-	Fps        float64 `json:"Fps"`
-}
-
-type TranscodeInfo struct {
-	FileId          string           `json:"FileId"`
-	Md5             string           `json:"Md5"`
-	FileType        string           `json:"FileType"`
-	LogoType        string           `json:"LogoType"`
-	Encrypt         bool             `json:"Encrypt"`
-	Format          string           `json:"Format"`
-	Duration        float64          `json:"Duration"`
-	Size            int64            `json:"Size"`
-	StoreUri        string           `json:"StoreUri"`
-	VideoStreamMeta *VideoStreamMeta `json:"VideoStreamMeta"`
-	AudioStreamMeta *AudioStreamMeta `json:"AudioStreamMeta"`
-	CreateTime      string           `json:"CreateTime"`
-}
-
-type SourceInfo struct {
-	FileId     string  `json:"FileId"`
-	Md5        string  `json:"Md5"`
-	FileType   string  `json:"FileType"`
-	Codec      string  `json:"Codec"`
-	Height     int64   `json:"Height"`
-	Width      int64   `json:"Width"`
-	Format     string  `json:"Format"`
-	Duration   float64 `json:"Duration"`
-	Size       int64   `json:"Size"`
-	StoreUri   string  `json:"StoreUri"`
-	Definition string  `json:"Definition"`
-	Bitrate    int64   `json:"Bitrate"`
-	Fps        float64 `json:"Fps"`
-	CreateTime string  `json:"CreateTime"`
-}
-
-type BasicInfo struct {
-	SpaceName     string   `json:"SpaceName"`
-	Vid           string   `json:"Vid"`
-	Title         string   `json:"Title"`
-	Description   string   `json:"Description"`
-	PosterUri     string   `json:"PosterUri"`
-	PublishStatus string   `json:"PublishStatus"`
-	AuditStatus   int64    `json:"AuditStatus"`
-	Tags          []string `json:"Tags"`
-	CreateTime    string   `json:"CreateTime"`
-}
-
-type VideoInfo struct {
-	BasicInfo      *BasicInfo       `json:"BasicInfo"`
-	SourceInfo     *SourceInfo      `json:"SourceInfo"`
-	TranscodeInfos []*TranscodeInfo `json:"TranscodeInfos"`
-}
-
-type GetVideoInfosData struct {
-	VideoInfoList []*VideoInfo `json:"VideoInfoList"`
-	NotExistVids  []string     `json:"NotExistVids"`
-}
-
 type GetVideoInfosResponse struct {
-	ResponseMetadata base.ResponseMetadata `json:"ResponseMetadata"`
-	Result           *GetVideoInfosData    `json:"Result,omitempty"`
+	models.GetVideoInfosResponse
 }
 
 //候选封面
 type GetRecommendedPostersRequest struct {
-	Vids []string
+	models.GetRecommendedPostersRequest
 }
 
 func NewGetRecommendedPostersRequest() *GetRecommendedPostersRequest {
