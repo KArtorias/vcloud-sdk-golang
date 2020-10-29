@@ -359,7 +359,7 @@ func (p *Vod) UpdateVideoPublishStatus(req *UpdateVideoPublishStatusRequest) (*U
 //获取视频信息
 func (p *Vod) GetVideoInfos(req *GetVideoInfosRequest) (*GetVideoInfosResponse, int, error) {
 	query := url.Values{}
-	query.Add("Vids", strings.Join(req.GetVids(), ","))
+	query.Add("Vids", req.GetVids())
 
 	respBody, status, err := p.Query("GetVideoInfos", query)
 	if err != nil {
@@ -377,7 +377,7 @@ func (p *Vod) GetVideoInfos(req *GetVideoInfosRequest) (*GetVideoInfosResponse, 
 //获取视频候选封面
 func (p *Vod) GetRecommendedPosters(req *GetRecommendedPostersRequest) (*GetRecommendedPostersResponse, int, error) {
 	query := url.Values{}
-	query.Add("Vids", strings.Join(req.GetVids(), ","))
+	query.Add("Vids", req.GetVids())
 
 	respBody, status, err := p.Query("GetRecommendedPoster", query)
 	if err != nil {

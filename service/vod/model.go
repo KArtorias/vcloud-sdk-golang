@@ -323,11 +323,11 @@ func NewGetVideoInfosRequest() *GetVideoInfosRequest {
 	return &GetVideoInfosRequest{}
 }
 
-func (r *GetVideoInfosRequest) SetVids(vids []string) {
+func (r *GetVideoInfosRequest) SetVids(vids string) {
 	r.Vids = vids
 }
 
-func (r *GetVideoInfosRequest) GetVids() []string {
+func (r *GetVideoInfosRequest) GetVids() string {
 	return r.Vids
 }
 
@@ -344,11 +344,11 @@ func NewGetRecommendedPostersRequest() *GetRecommendedPostersRequest {
 	return &GetRecommendedPostersRequest{}
 }
 
-func (r *GetRecommendedPostersRequest) SetVids(vids []string) {
+func (r *GetRecommendedPostersRequest) SetVids(vids string) {
 	r.Vids = vids
 }
 
-func (r *GetRecommendedPostersRequest) GetVids() []string {
+func (r *GetRecommendedPostersRequest) GetVids() string {
 	return r.Vids
 }
 
