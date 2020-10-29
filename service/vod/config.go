@@ -182,11 +182,11 @@ var (
 				"Version": []string{"2020-08-01"},
 			},
 		},
-		"GetRecommendedPosters": {
+		"GetRecommendedPoster": {
 			Method: http.MethodGet,
 			Path:   "/",
 			Query: url.Values{
-				"Action":  []string{"GetRecommendedPosters"},
+				"Action":  []string{"GetRecommendedPoster"},
 				"Version": []string{"2020-08-01"},
 			},
 		},

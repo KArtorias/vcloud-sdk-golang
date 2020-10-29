@@ -352,12 +352,6 @@ func (r *GetRecommendedPostersRequest) GetVids() []string {
 	return r.Vids
 }
 
-type GetRecommendedPostersData struct {
-	StoreUriGroups map[string][]string `json:"StoreUriGroups"`
-	NotExistVids   []string            `json:"NotExistVids"`
-}
-
 type GetRecommendedPostersResponse struct {
-	ResponseMetadata base.ResponseMetadata      `json:"ResponseMetadata"`
-	Result           *GetRecommendedPostersData `json:"Result,omitempty"`
+	models.GetRecPostersResponse
 }

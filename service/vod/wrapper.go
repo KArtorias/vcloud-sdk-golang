@@ -5,8 +5,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/TTvcloud/vcloud-sdk-golang/models"
-	"google.golang.org/protobuf/encoding/protojson"
 	"hash/crc32"
 	"io/ioutil"
 	"math/rand"
@@ -15,6 +13,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/TTvcloud/vcloud-sdk-golang/models"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/TTvcloud/vcloud-sdk-golang/base"
 
@@ -89,7 +90,6 @@ func (p *Vod) GetOriginVideoPlayInfo(req *models.VodGetOriginalPlayInfoRequest) 
 		return output, status, nil
 	}
 }
-
 
 func (p *Vod) StartWorkflow(req *StartWorkflowRequest) (*StartWorkflowResp, error) {
 	form := url.Values{
@@ -379,7 +379,7 @@ func (p *Vod) GetRecommendedPosters(req *GetRecommendedPostersRequest) (*GetReco
 	query := url.Values{}
 	query.Add("Vids", strings.Join(req.GetVids(), ","))
 
-	respBody, status, err := p.Query("GetRecommendedPosters", query)
+	respBody, status, err := p.Query("GetRecommendedPoster", query)
 	if err != nil {
 		return nil, status, err
 	}
